@@ -1,0 +1,12 @@
+matplotlib
+pandas
+datetime
+scikit-learn == 1.2.2
+numpy
+IPython
+seaborn
+gunicorn
+uvicorn
+fastapi
+sqlalchemy
+psycopg2-binary
