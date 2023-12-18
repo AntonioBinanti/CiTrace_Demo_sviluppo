@@ -42,6 +42,14 @@ def retrain_cluster_model(db: Session):
     table = table.merge(click_table, left_on = "actualUser", right_on = "user_id")
     
 #%% Aumento punteggio components in base alle preferenze dell'utente
+    components = crud_functions.get_components_list(db)
+    components_in_table = all(column in table.columns for column in components) #Componenti su cui sono stati eseguite azioni
+    #print(f"\n\n\nComponenti: {components}\n\n\n")
+    #print(f"\n\n\nTutti i componenti sono in tabella: {components_in_table}\n\n\n")
+    missing_columns = [column for column in components if column not in table.columns]
+    #print(f"\n\n\nMancano le seguenti colonne: {missing_columns}\n\n\n")
+    for column in missing_columns:
+        table[column] = 1
     for user in range(0, len(actualUser)):
         model_user = crud_functions.get_user_id(db, user)
         user_interests = crud_functions.get_user_interests(db, model_user)
@@ -50,8 +58,8 @@ def retrain_cluster_model(db: Session):
             table.loc[user, i] = value + value * interest_value
 
 #%% Filtraggio valori utili per clusterizzazione
-    components = request["component"].unique().tolist()
-
+    #components = request["component"].unique().tolist()
+    #components = crud_functions.get_components(db)
     x = pd.DataFrame()
     for c in components: #importiamo i click per componente da "table"
         x[c] = table[c]

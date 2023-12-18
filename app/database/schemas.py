@@ -102,3 +102,15 @@ class UserRequests(User):
     requests: Optional[List[RequestExt]] = []
     class Config:
         orm_mode = True
+        
+class ActionPredict(BaseModel):
+    user_id: int
+    browser_id: int
+    year: int
+    month: int
+    day: int
+    hour: int
+    minute:int 
+    day_week: Optional[int]
+    class Config:
+        orm_mode = True

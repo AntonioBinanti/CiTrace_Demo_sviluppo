@@ -22,6 +22,13 @@ def get_new_id(db: Session, table: str):
 def get_components(db: Session):
     return db.query(models.Components).all()
 
+def get_components_list(db: Session):
+    components = get_components(db)
+    components_list = []
+    for c in components:
+        components_list.append(c.title)
+    return components_list
+
 def get_component(db: Session, title: str):
     return db.query(models.Components).filter(models.Components.title == title).first()
 

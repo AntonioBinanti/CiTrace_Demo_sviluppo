@@ -9,15 +9,19 @@ Created on Wed Nov 15 11:00:06 2023
 from fastapi import FastAPI, Depends, HTTPException
 #from typing import Dict, List
 #from pydantic import BaseModel
-from app.ML_models.model_functions import predict_cluster
-from app.ML_models.model_functions import predict_components
+from app.ML_models import model_functions
 from app.ML_models.model_functions import __version__ as model_version
 from app.ML_models.Cluster_CiTrace_Demo import retrain_cluster_model
 from app.ML_models.DecisionTree_CiTrace_Demo import retrain_components_prediction_model
+from app.ML_models.Action_predictor import retrain_action_prediction_model
 from app.database import models, schemas, crud_functions
 from app.database.database import engine, SessionLocal
 from sqlalchemy.orm import Session
 from app.dataset import test_import_database
+import datetime
+
+#%% Variabili globali
+model_version = "0.1.0"
 
 #%% Definizione app e database 
 app = FastAPI()
@@ -41,13 +45,19 @@ def home():
     
 @app.post("/predict_cluster", response_model = schemas.PredictionCluster)
 def predict_clust(payload: schemas.UserReg):
-    cluster = predict_cluster(payload.new_user_preferences)
+    cluster = model_functions.predict_cluster(payload.new_user_preferences)
     return {"cluster": cluster} 
 
 @app.post("/predict_components")
 def predict_comp(payload: schemas.UserPref):
-    components_dict = predict_components(payload.user_id, payload.device_info_id)
+    components_dict = model_functions.predict_components(payload.user_id, payload.device_info_id)
     return {"Scorciatoie": components_dict}
+
+@app.post("/predict_action")
+def predict_action(payload: schemas.ActionPredict):
+    day_week = datetime.date(payload.year, payload.month, payload.day).weekday()
+    action_predicted = model_functions.predict_action(payload.user_id, payload.browser_id, payload.year, payload.month, payload.day, payload.hour, payload.minute, day_week)
+    return {"Azione predetta": action_predicted}
 
 #%% API CRUD per il database
 
@@ -242,6 +252,10 @@ def retrain_cluster(db: Session = Depends(get_db)):
 @app.get("/retrain_components_prediction")
 def retrain_components_prediction(db: Session = Depends(get_db)):
     return retrain_components_prediction_model(db)
+
+@app.get("/retrain_action_prediction")
+def retrain_action_prediction(db: Session = Depends(get_db)):
+    return retrain_action_prediction_model(db)
 
 @app.delete("/drop_all_database")
 def drop_all():

@@ -8,6 +8,7 @@ Created on Wed Nov 15 10:36:42 2023
 import pickle
 from pathlib import Path
 import pandas as pd 
+import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
 from app.database import crud_functions
@@ -23,6 +24,7 @@ components = pickle.load(open(f"{BASE_DIR}/components.pkl", "rb"))
 pca = pickle.load(open(f"{BASE_DIR}/pca.pkl", "rb"))
 scaler = pickle.load(open(f"{BASE_DIR}/scaler_components.pkl", "rb"))
 model_dtree = pickle.load(open(f"{BASE_DIR}/decisionTree_model-{__version__}.pkl",'rb'))
+model_Action_predictor = pickle.load(open(f"{BASE_DIR}/action_predictor_model-{__version__}.pkl",'rb'))
 
 #%% Predizioni
 def predict_cluster(preferences): 
@@ -43,6 +45,12 @@ def predict_components(user_id, device_info_id):
         for u1 in range(0, len(comp)):
             components_dict[int(u1 + 1)] = comp[u1]
     return components_dict
+    
+def predict_action(user_id, browser_id, year, month, day, hour, minute, day_week):
+    to_predict = [[user_id, browser_id, year, month, day, hour, minute, day_week]]
+    prediction = model_Action_predictor.predict(to_predict).tolist()
+    print(prediction)
+    return prediction
     
 #%%Test
 #a = predict_components(3, 4)
